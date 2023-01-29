@@ -20,10 +20,6 @@ public class JwtService {
 
     private final static String SECRET_KEY = "4125432A462D4A614E645267556B58703273357638792F423F4528472B4B6250";
 
-  /*  SecretKey key = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-    String secretString = Encoders.BASE64.encode(key.getEncoded());
-System.out.println("Secret key: " + secretString);
-*/
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

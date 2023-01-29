@@ -1,7 +1,6 @@
 package com.kull.citylist.security;
 
 import com.kull.citylist.exception.UserException;
-import com.kull.citylist.model.Role;
 import com.kull.citylist.model.User;
 import com.kull.citylist.repository.UserRepository;
 import org.springframework.security.authentication.AuthenticationManager;

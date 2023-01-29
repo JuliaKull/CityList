@@ -37,13 +37,4 @@ public record UserController(UserService userService) {
                 .ok()
                 .body(userService.findAll());
     }
-
- /*   @RequestMapping("/assign/{userId}/{roleId}")
-    public void assignRole(@PathVariable String userId,@PathVariable String roleId){
-        roleService.assignUserRole(roleId,userId);
-    }*/
-
-
-
-
 }

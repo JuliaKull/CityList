@@ -15,7 +15,7 @@ import java.io.IOException;
 @Service
 public record CityService(CityRepository cityRepository) {
 
-    private final static String MESSAGE = "City not found";
+    public final static String MESSAGE = "City not found";
     private final static String SECUTITY_MESSAGE = "Access denied, lack of rights";
 
 

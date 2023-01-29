@@ -7,16 +7,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 
 @Service
-public record CityService(CityRepository cityRepository,MongoTemplate mongoTemplate) {
+public record CityService(CityRepository cityRepository) {
 
     private final static String MESSAGE = "City not found";
+    private final static String SECUTITY_MESSAGE = "Access denied, lack of rights";
 
 
     public String addCityAndPhoto(String name, MultipartFile file) throws IOException {
@@ -28,7 +28,7 @@ public record CityService(CityRepository cityRepository,MongoTemplate mongoTempl
     }
 
     public City updateCityAndPhoto(String name, String updatedName, MultipartFile image) throws IOException {
-        City city = cityRepository.findByName(name).orElseThrow(() -> new CityException(MESSAGE));
+        City city = cityRepository.findByName(name).orElseThrow(() -> new CityException(SECUTITY_MESSAGE));
         if (!name.equals(updatedName)){
             city.setName(updatedName);}
         city.setPhoto(image.getBytes());

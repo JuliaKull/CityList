@@ -19,19 +19,20 @@ public record CityService(CityRepository cityRepository) {
     private final static String SECUTITY_MESSAGE = "Access denied, lack of rights";
 
 
-    public String addCityAndPhoto(String name, MultipartFile file) throws IOException {
+    public void addCityAndPhoto(String name, String link) {
         City city = new City();
         city.setName(name);
-        city.setPhoto(file.getBytes());
-        city = cityRepository.insert(city);
-        return city.getId();
+        city.setPhotoUrl(link);
+        if(cityRepository.findByName(name)==null){
+        city = cityRepository.insert(city);}
     }
 
-    public City updateCityAndPhoto(String name, String updatedName, MultipartFile image) throws IOException {
+    public City updateCityAndPhoto(String name, String updatedName, String link) {
         City city = cityRepository.findByName(name).orElseThrow(() -> new CityException(SECUTITY_MESSAGE));
-        if (!name.equals(updatedName)){
-            city.setName(updatedName);}
-        city.setPhoto(image.getBytes());
+        if (!name.equals(updatedName)) {
+            city.setName(updatedName);
+        }
+        city.setPhotoUrl(link);
         return cityRepository.save(city);
     }
 

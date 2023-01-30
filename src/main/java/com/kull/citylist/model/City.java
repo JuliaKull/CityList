@@ -1,19 +1,23 @@
 package com.kull.citylist.model;
 
 
-import lombok.Data;
-import lombok.RequiredArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Document(collection = "cities")
-@RequiredArgsConstructor
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
+@Builder
 public class City {
     @Id
     private String id;
     private String name;
-    private byte[] photo;
+    private String photoUrl;
 
-
+    public City(String name, String photoUrl) {
+        this.name = name;
+        this.photoUrl = photoUrl;
+    }
 }

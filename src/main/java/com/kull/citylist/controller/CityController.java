@@ -7,10 +7,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.List;
 
 @RestController
 @RequestMapping("api/v1/cities")
@@ -18,25 +16,25 @@ import java.util.List;
 public record CityController(CityService cityService) {
 
     @PostMapping("/add")
-    public ResponseEntity<String> addCityAndPhoto(@RequestParam("name") String name,
-                               @RequestParam("image") MultipartFile image) throws IOException {
+    public void addCityAndPhoto(@RequestParam("name") String name,
+                                                  @RequestParam("image") String link) {
         log.info("REST request to add new city :{}", name);
-        return ResponseEntity.ok().body(cityService.addCityAndPhoto(name, image));
+        cityService.addCityAndPhoto(name, link);
     }
 
     @PreAuthorize("hasRole('ROLE_ALLOW_EDIT')")
     @PutMapping("/update/{name}")
     public ResponseEntity<City> updateCityAndPhoto(@RequestParam("name") String name, @RequestParam("updated_name") String updatedName,
-                                                   @RequestParam("image") MultipartFile image) throws IOException {
-        log.info("REST request to add new city :{}", name);
-        return ResponseEntity.ok().body(cityService.updateCityAndPhoto(name,updatedName,image));
+                                                   @RequestParam("image") String link) {
+        log.info("REST request to update the city :{}", name);
+        return ResponseEntity.ok().body(cityService.updateCityAndPhoto(name, updatedName, link));
     }
 
     @GetMapping()
     public ResponseEntity<Page<City>> getAll(@RequestParam(value = "page", defaultValue = "0") int page,
-                              @RequestParam(value = "size", defaultValue = "12") int size)  {
-        log.info("REST request to get cities");
-        return ResponseEntity.ok().body(cityService.getAll(page,size));
+                                             @RequestParam(value = "size", defaultValue = "12") int size) {
+        log.info("REST request to get all cities");
+        return ResponseEntity.ok().body(cityService.getAll(page, size));
     }
 
     @GetMapping("/{name}")
@@ -45,5 +43,5 @@ public record CityController(CityService cityService) {
         return ResponseEntity.ok().body(cityService.findByName(name));
     }
 
-    }
+}
 

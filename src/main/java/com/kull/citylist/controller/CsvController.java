@@ -14,6 +14,7 @@ public record CsvController(CsvService service) {
 
     @PostMapping(value = "/upload")
     public void uploadCsv(@RequestParam("file") MultipartFile file) throws IOException {
+        log.info("REST request to upload new file :{}", file.getOriginalFilename());
         service.saveCsvFile(file);
     }
 

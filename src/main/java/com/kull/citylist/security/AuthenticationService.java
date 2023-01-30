@@ -44,8 +44,8 @@ public record AuthenticationService(UserRepository repository, PasswordEncoder p
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         manager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUsername(),request.getPassword()));
-        var user = repository.findByUsername(request.getUsername()).orElseThrow(()->new UserException(MESSAGE));
+                new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword()));
+        var user = repository.findByUsername(request.getUsername()).orElseThrow(() -> new UserException(MESSAGE));
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
                 .token(jwtToken)

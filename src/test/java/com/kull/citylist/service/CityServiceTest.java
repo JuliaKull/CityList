@@ -87,16 +87,6 @@ class CityServiceTest {
         assertEquals(2, result.getTotalElements());
 
     }
-//        Page<City> expectedPage = new PageImpl<>(cityList);
-//        Pageable pageable = PageRequest.of(page, size, Sort.by("name").descending());
-//
-//        when(repository.findAll(pageable)).thenReturn(expectedPage);
-//
-//        Page<CityDto> actualPage = service.getAll(page, size);
-//
-//        verify(repository).findAll(pageable);
-//        assertEquals(expectedPage, actualPage);
-
 
 
     @Test

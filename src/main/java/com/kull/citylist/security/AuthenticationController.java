@@ -11,8 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @Slf4j
+@RequiredArgsConstructor
 @RequestMapping("api/v1/auth")
-public record AuthenticationController(AuthenticationService service) {
+public class AuthenticationController {
+
+    private final AuthenticationService service;
 
     @PostMapping("/register")
     public ResponseEntity<AuthenticationResponse> register(@RequestBody RegisterRequest request) {

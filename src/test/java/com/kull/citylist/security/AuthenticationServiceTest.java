@@ -1,7 +1,9 @@
 package com.kull.citylist.security;
 
+import com.kull.citylist.dto.UserDto;
 import com.kull.citylist.model.User;
 import com.kull.citylist.repository.UserRepository;
+import com.kull.citylist.service.mapper.UserMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +21,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class AuthenticationServiceTest {
@@ -26,42 +29,46 @@ class AuthenticationServiceTest {
     @Mock
     private AuthenticationManager manager;
     @InjectMocks
-    AuthenticationService service;
+    private AuthenticationService service;
     @Mock
-    PasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
     @Mock
-    UserRepository repository;
+    private UserRepository repository;
     @Mock
-    JwtService jwtService;
+    private JwtService jwtService;
+
+    @Mock
+    private UserMapper mapper;
 
     @Test
     void registerUser() {
         String username = "user";
         String password = "password";
         String encodedPassword = "$2a$10$encoded_password";
-        RegisterRequest request = new RegisterRequest(username,password);
+        RegisterRequest request = new RegisterRequest(username, password);
 
-        User expectedUser = User.builder()
+        var expectedUser = UserDto.builder()
                 .username(username)
                 .password(encodedPassword)
                 .role("USER")
                 .build();
 
+        User user = mapper.toEntity(expectedUser);
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
 
-        when(repository.save(expectedUser)).thenReturn(expectedUser);
+        when(repository.save(user)).thenReturn(user);
 
         String jwtToken = "token";
-        when(jwtService.generateToken(expectedUser)).thenReturn(jwtToken);
+        when(jwtService.generateToken(user)).thenReturn(jwtToken);
 
 
         AuthenticationResponse response = service.register(request);
 
         verify(passwordEncoder).encode(password);
-        verify(repository).save(expectedUser);
-        verify(jwtService).generateToken(expectedUser);
+        verify(repository).save(user);
+        verify(jwtService).generateToken(user);
 
-        assertEquals(jwtToken,response.getToken());
+        assertEquals(jwtToken, response.getToken());
     }
 
 
@@ -70,29 +77,30 @@ class AuthenticationServiceTest {
         String username = "user";
         String password = "password";
         String encodedPassword = "$2a$10$encoded_password";
-        RegisterRequest request = new RegisterRequest(username,password);
+        RegisterRequest request = new RegisterRequest(username, password);
 
-        User expectedUser = User.builder()
+        var expectedUser = UserDto.builder()
                 .username(username)
                 .password(encodedPassword)
                 .role("ROLE_ALLOW_EDIT")
                 .build();
 
+        User user = mapper.toEntity(expectedUser);
         when(passwordEncoder.encode(password)).thenReturn(encodedPassword);
 
-        when(repository.save(expectedUser)).thenReturn(expectedUser);
+        when(repository.save(user)).thenReturn(user);
 
         String jwtToken = "token";
-        when(jwtService.generateToken(expectedUser)).thenReturn(jwtToken);
+        when(jwtService.generateToken(user)).thenReturn(jwtToken);
 
 
         AuthenticationResponse response = service.registerAdmin(request);
 
         verify(passwordEncoder).encode(password);
-        verify(repository).save(expectedUser);
-        verify(jwtService).generateToken(expectedUser);
+        verify(repository).save(user);
+        verify(jwtService).generateToken(user);
 
-        assertEquals(jwtToken,response.getToken());
+        assertEquals(jwtToken, response.getToken());
     }
 
 
@@ -101,7 +109,7 @@ class AuthenticationServiceTest {
         String username = "user";
         String password = "password";
         String encodedPassword = "$2a$10$encoded_password";
-        AuthenticationRequest request = new AuthenticationRequest(username,password);
+        AuthenticationRequest request = new AuthenticationRequest(username, password);
         User user = User.builder()
                 .username(username)
                 .password(encodedPassword)
@@ -121,11 +129,11 @@ class AuthenticationServiceTest {
 
         AuthenticationResponse actualResponse = service.authenticate(request);
 
-        verify(manager).authenticate(new UsernamePasswordAuthenticationToken(username,password));
+        verify(manager).authenticate(new UsernamePasswordAuthenticationToken(username, password));
         verify(repository).findByUsername(username);
         verify(jwtService).generateToken(user);
 
-        assertEquals(expectedResponse.getToken(),actualResponse.getToken());
+        assertEquals(expectedResponse.getToken(), actualResponse.getToken());
 
 
     }

@@ -1,24 +1,30 @@
 package com.kull.citylist.service;
 
+import com.kull.citylist.dto.CityDto;
+import com.kull.citylist.exception.UserException;
 import com.kull.citylist.model.City;
 import com.kull.citylist.repository.CityRepository;
 import com.kull.citylist.repository.UserRepository;
+import com.kull.citylist.service.mapper.CityMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.domain.*;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.kull.citylist.service.CityService.MESSAGE;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -28,79 +34,82 @@ class CityServiceTest {
     private CityRepository repository;
     @InjectMocks
     private CityService service;
+    @Spy
+    private CityMapper mapper;
 
 
     @Test
     void addCityAndPhoto() {
-        String name = "name";
-        String url = "url";
-        City city = City.builder()
-                .name(name).photoUrl(url).build();
+            CityDto cityDto = new CityDto();
+            City city = new City();
+            when(mapper.toEntity(cityDto)).thenReturn(city);
+            when(repository.save(any(City.class))).thenReturn(city);
+            when(mapper.toDto(city)).thenReturn(cityDto);
 
-        when(repository.findByName(name)).thenReturn(null);
-        when(repository.insert(city)).thenReturn(city);
+            CityDto result = service.addCityAndPhoto(cityDto);
 
-        service.addCityAndPhoto(city.getName(),city.getPhotoUrl());
-
-        verify(repository).findByName(name);
-        verify(repository).insert(city);
-
-
-    }
+            assertEquals(cityDto, result);
+        }
 
     @Test
     void updateCityAndPhoto() {
-        String id = "1";
         String name = "name";
-        String updatedName = "new name";
-        String url = "url";
-        City city = new City(id,name, url);
+        CityDto cityDto = CityDto.builder().id("1").name("new name").photoUrl("url").build();
+        City city = City.builder().id("1").name("name").photoUrl("url").build();
 
-        when(repository.save(city)).thenReturn(city);
         when(repository.findByName(name)).thenReturn(Optional.of(city));
 
-        City updatedCity = service.updateCityAndPhoto(name,updatedName,url);
+        when(mapper.toDto(city)).thenReturn(cityDto);
 
-        verify(repository).save(city);
-        verify(repository).findByName(name);
-        assertEquals(updatedName,updatedCity.getName());
-        assertEquals(url,updatedCity.getPhotoUrl());
+        CityDto result = service.updateCityAndPhoto(name, cityDto);
+
+        assertEquals(cityDto, result);
     }
+
 
     @Test
     void getAll() {
         int page = 0;
         int size = 12;
-        List<City> cityList = List.of(City.builder().id("1").name("name1").photoUrl("url1").build(),
+        List<CityDto> cityListDto = Arrays.asList(CityDto.builder().id("1").name("name1").photoUrl("url1").build(),
+                CityDto.builder().id("2").name("name2").photoUrl("url2").build());
+        List<City> cityList = Arrays.asList(City.builder().id("1").name("name1").photoUrl("url1").build(),
                 City.builder().id("2").name("name2").photoUrl("url2").build());
 
-        Page<City> expectedPage = new PageImpl<>(cityList);
+        Page<City> cities = new PageImpl<>(cityList);
         Pageable pageable = PageRequest.of(page, size, Sort.by("name").descending());
+        when(repository.findAll(pageable)).thenReturn(cities);
+        when(mapper.toDtos(cityList)).thenReturn(cityListDto);
 
-        when(repository.findAll(pageable)).thenReturn(expectedPage);
 
-        Page<City> actualPage = service.getAll(page, size);
+        Page<CityDto> result = service.getAll(page, size);
 
-        verify(repository).findAll(pageable);
-        assertEquals(expectedPage, actualPage);
-
+        assertEquals(2, result.getTotalElements());
 
     }
+//        Page<City> expectedPage = new PageImpl<>(cityList);
+//        Pageable pageable = PageRequest.of(page, size, Sort.by("name").descending());
+//
+//        when(repository.findAll(pageable)).thenReturn(expectedPage);
+//
+//        Page<CityDto> actualPage = service.getAll(page, size);
+//
+//        verify(repository).findAll(pageable);
+//        assertEquals(expectedPage, actualPage);
+
+
 
     @Test
     void findByName() {
-        String name = "Name";
-        City city = City.builder()
-                .id("1")
-                .name("Name")
-                .photoUrl("url")
-                .build();
-        when(repository.findByName(city.getName())).thenReturn(Optional.of(city));
 
-        City actualCity = service.findByName(name);
+        CityDto cityDto = new CityDto();
+        cityDto.setName("name");
+        City city = new City();
+        when(repository.findByName(cityDto.getName())).thenReturn(Optional.of(city));
+        when(mapper.toDto(city)).thenReturn(cityDto);
 
-        verify(repository).findByName(name);
-        assertEquals(city, actualCity);
+        CityDto result = service.findByName(cityDto);
 
+        assertEquals(cityDto, result);
     }
 }

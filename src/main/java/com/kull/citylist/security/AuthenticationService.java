@@ -1,8 +1,11 @@
 package com.kull.citylist.security;
 
+import com.kull.citylist.dto.UserDto;
 import com.kull.citylist.exception.UserException;
 import com.kull.citylist.model.User;
 import com.kull.citylist.repository.UserRepository;
+import com.kull.citylist.service.mapper.UserMapper;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,15 +15,22 @@ import static com.kull.citylist.service.CityService.MESSAGE;
 
 
 @Service
-public record AuthenticationService(UserRepository repository, PasswordEncoder passwordEncoder,
-                                    JwtService jwtService, AuthenticationManager manager) {
+@RequiredArgsConstructor
+public class AuthenticationService{
+    private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final AuthenticationManager manager;
+
+    private final UserMapper mapper;
 
     public AuthenticationResponse register(RegisterRequest request) {
-        var user = User.builder()
+        var userDto = UserDto.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("USER")
                 .build();
+        User user = mapper.toEntity(userDto);
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
@@ -29,11 +39,12 @@ public record AuthenticationService(UserRepository repository, PasswordEncoder p
     }
 
     public AuthenticationResponse registerAdmin(RegisterRequest request) {
-        var user = User.builder()
+        var userDto = UserDto.builder()
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role("ROLE_ALLOW_EDIT")
                 .build();
+        User user = mapper.toEntity(userDto);
         repository.save(user);
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()
